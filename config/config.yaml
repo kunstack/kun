@@ -1,0 +1,43 @@
+# Log log related configuration
+log:
+  # log level, optional value trace,info,warn,error,panic,fatal
+  level: trace
+  # caller encoder optional: long, short
+  caller: long
+  # log encoder, optional: text, json
+  format: text
+  # time encoder eg: RFC3339 , RFC3339NANO, RFC822, RFC850, RFC1123, STAMP
+  time: rfc3339
+  # log file path
+  file: ./compass.log
+
+# MySQL related configuration
+mysql:
+  # The host name of the MySQL server
+  host: 127.0.0.1:3306
+  # The database username of the MySQL server
+  database: compass
+  # MySQL database name
+  username: root
+  # MySQL server database password
+  password:
+  # Maximum number of idle MySQL connections
+  max_idle: 100
+  # Maximum lifetime of MySQL connection
+  max_life: 1000
+  # MySQL database connection pool size
+  pool_limit: 1024
+
+# Web related configuration
+http:
+  # address bound by the web service
+  address: 127.0.0.1:5443
+  # web trusted CA path
+  trusted_ca_file: ssl/ca.pem
+  # client_auth_mode is the mode for authenticating the client.
+  # Allowed values are request,require, verify_if_given, require_and_verify
+  client_auth_mode: request
+  # public key of the web service
+  certificate_file: ssl/compass.pem
+  # private key of the web service
+  certificate_key_file: ssl/compass-key.pem

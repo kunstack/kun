@@ -1,3 +1,16 @@
+/*
+ * Copyright 2021 Aapeli.Smith<aapeli.nian@gmail.com>.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package version
 
 import (
@@ -6,11 +19,11 @@ import (
 )
 
 var (
-	// Semver holds the current version of traffox.
+	// Semver holds the current version of kun.
 	Semver = "dev"
-	// BuildDate holds the build date of traffox.
+	// BuildDate holds the build date of kun.
 	BuildDate = "I don't remember exactly"
-	// StartDate holds the start date of traffox.
+	// StartDate holds the start date of kun.
 	StartDate = time.Now()
 	// GitCommit The commit ID of the current commit.
 	GitCommit = "I don't remember exactly"

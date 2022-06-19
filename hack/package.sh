@@ -13,4 +13,4 @@
 # limitations under the License.
 #
 
-docker build  -t "ghcr.io/aapelismith/traffox/traffox:$(git describe --tags --always)"  .
+docker build  -t "ghcr.io/aapelismith/kun/kun:$(git describe --tags --always)"  .

@@ -12,3 +12,28 @@
  */
 
 package config_test
+
+import (
+	"fmt"
+	"github.com/aapelismith/kuntunnel/pkg/apiserver/config"
+	"sigs.k8s.io/yaml"
+)
+
+import "testing"
+
+const data = `
+log:
+  level: debug
+encoderConfig: 
+  levelEncoder: capital
+`
+
+func TestConfiguration_Flags(t *testing.T) {
+	cfg := &config.Configuration{}
+
+	if err := yaml.Unmarshal([]byte(data), cfg); err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(cfg.Log.Level)
+}

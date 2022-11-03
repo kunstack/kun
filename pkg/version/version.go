@@ -19,18 +19,18 @@ import (
 )
 
 var (
-	// Semver holds the current version of kun.
+	// Semver holds the current version of client.
 	Semver = "dev"
-	// BuildDate holds the build date of kun.
+	// BuildDate holds the build date of client.
 	BuildDate = "I don't remember exactly"
-	// StartDate holds the start date of kun.
+	// StartDate holds the start date of client.
 	StartDate = time.Now()
 	// GitCommit The commit ID of the current commit.
 	GitCommit = "I don't remember exactly"
 )
 
-// Version describes compile time information.
-type Version struct {
+// Info describes compile time information.
+type Info struct {
 	// Semver is the current semver.
 	Semver string `json:"version,omitempty"`
 	// GitCommit is the git sha1.
@@ -44,8 +44,8 @@ type Version struct {
 }
 
 // Get returns build info
-func Get() *Version {
-	return &Version{
+func Get() Info {
+	return Info{
 		Semver:    Semver,
 		GitCommit: GitCommit,
 		StartDate: StartDate,

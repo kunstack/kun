@@ -21,5 +21,5 @@ test:
 .PHONY: test
 
 generate:
-	go generate ./...
+	bash hack/generate.sh
 .PHONY: generate

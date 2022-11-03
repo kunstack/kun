@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 The KunStack Authors.
+ * Copyright 2021 Aapeli.Smith<aapeli.nian@gmail.com>.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,65 +14,168 @@
 package log
 
 import (
+	"errors"
+	"fmt"
 	"github.com/spf13/pflag"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"golang.org/x/exp/slices"
 )
 
-// Options log related configuration
+var (
+	encodings = []string{"json", "console"}
+)
+
+var (
+	_ pflag.Value = (*atomicLevel)(nil)
+)
+
+type atomicLevel struct {
+	lvl *zap.AtomicLevel
+}
+
+func (a *atomicLevel) String() string {
+	return a.lvl.String()
+}
+
+func (a *atomicLevel) Set(s string) error {
+	lvl, err := zapcore.ParseLevel(s)
+	if err != nil {
+		return err
+	}
+	a.lvl.SetLevel(lvl)
+	return nil
+}
+
+func (a *atomicLevel) Type() string {
+	return "string"
+}
+
 type Options struct {
-	// log level, optional value trace,info,warn,error,panic,fatal
-	Level string `yaml:"level,omitempty" json:"level,omitempty"`
-	// log file path
-	File string `yaml:"file,omitempty" json:"file,omitempty"`
-	// time encoder eg: RFC3339 , RFC3339NANO, RFC822, RFC850, RFC1123, STAMP
-	Time string `yaml:"time,omitempty" json:"time,omitempty"`
-	// caller encoder optional: long, short
-	Caller string `yaml:"caller,omitempty" json:"caller,omitempty"`
-	// log encoder, optional: text, json
-	Format string `yaml:"format,omitempty" json:"format,omitempty"`
-	// MaxVerbosity Specifies the maximum Verbosity value that the current logger can display
-	MaxVerbosity int `yaml:"maxVerbosity,omitempty" json:"maxVerbosity,omitempty"`
+	// Options the zap options
+	Options []zap.Option `yaml:"-" json:"-"`
+
+	// Level is the minimum enabled logging level. Note that this is a dynamic
+	// level, so calling Config.Level.SetLevel will atomically change the log
+	// level of all loggers descended from this config.
+	Level zap.AtomicLevel `json:"level" yaml:"level"`
+
+	// Development puts the logger in development mode, which changes the
+	// behavior of DPanicLevel and takes stacktrace more liberally.
+	Development bool `json:"development" yaml:"development"`
+
+	// DisableCaller stops annotating logs with the calling function's file
+	// name and line number. By default, all logs are annotated.
+	DisableCaller bool `json:"disableCaller" yaml:"disableCaller"`
+
+	// DisableStacktrace completely disables automatic stacktrace capturing. By
+	// default, stacktrace are captured for WarnLevel and above logs in
+	// development and ErrorLevel and above in production.
+	DisableStacktrace bool `json:"disableStacktrace" yaml:"disableStacktrace"`
+
+	// Sampling sets a sampling policy. A nil SamplingConfig disables sampling.
+	Sampling *zap.SamplingConfig `json:"sampling" yaml:"sampling"`
+
+	// Encoding sets the logger's encoding. Valid values are "json" and
+	// "console", as well as any third-party encodings registered via
+	// RegisterEncoder.
+	Encoding string `json:"encoding" yaml:"encoding"`
+
+	// EncoderConfig sets options for the chosen encoder. See
+	// zapcore.EncoderConfig for details.
+	EncoderConfig zapcore.EncoderConfig `json:"encoderConfig" yaml:"encoderConfig"`
+
+	// OutputPaths is a list of URLs or file paths to write logging output to.
+	// See Open for details.
+	OutputPaths []string `json:"outputPaths" yaml:"outputPaths"`
+
+	// ErrorOutputPaths is a list of URLs to write internal logger errors to.
+	// The default is standard error.
+	//
+	// Note that this setting only affects internal errors; for sample code that
+	// sends error-level logs to a different location from info- and debug-level
+	// logs, see the package-level AdvancedConfiguration example.
+	ErrorOutputPaths []string `json:"errorOutputPaths" yaml:"errorOutputPaths"`
+
+	// InitialFields is a collection of fields to add to the root logger.
+	InitialFields map[string]interface{} `json:"initialFields" yaml:"initialFields"`
 }
 
 // SetDefaults sets the default values.
-func (l *Options) SetDefaults() {
-	l.Time = "RFC3339"
-	l.Format = "TEXT"
-	l.Level = "INFO"
-	l.Caller = "NONE"
+func (o *Options) SetDefaults() {
+	o.Options = make([]zap.Option, 0)
+
+	o.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+
+	o.Encoding = "console"
+
+	if o.Sampling == nil {
+		o.Sampling = &zap.SamplingConfig{}
+	}
+
+	o.Sampling.Initial = 100
+	o.Sampling.Thereafter = 100
+
+	o.EncoderConfig.TimeKey = "ts"
+	o.EncoderConfig.LevelKey = "level"
+	o.EncoderConfig.NameKey = "logger"
+	o.EncoderConfig.CallerKey = "caller"
+	o.EncoderConfig.FunctionKey = zapcore.OmitKey
+	o.EncoderConfig.MessageKey = "msg"
+	o.EncoderConfig.StacktraceKey = "stacktrace"
+	o.EncoderConfig.LineEnding = zapcore.DefaultLineEnding
+	o.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	o.EncoderConfig.EncodeTime = zapcore.RFC3339NanoTimeEncoder
+	o.EncoderConfig.EncodeDuration = zapcore.StringDurationEncoder
+	o.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
+
+	o.OutputPaths = []string{"stderr"}
+	o.ErrorOutputPaths = []string{"stderr"}
 }
 
-// Flags Returns a collection of command line flags
-func (l *Options) Flags() *pflag.FlagSet {
-	fs := pflag.NewFlagSet("log", pflag.ContinueOnError)
-	fs.StringVar(&l.Level, "log.level", l.Level, "Log level,Those below this level will not be output optional value trace,info,warn,error,panic,fatal")
-	fs.StringVar(&l.File, "log.file", l.File, "The path of the log file, if the file does not exist, it will be created automatically")
-	fs.StringVar(&l.Time, "log.time", l.Time, "The encoder of the time field in the log, eg: RFC3339, RFC3339NANO, RFC822, RFC850, RFC1123, STAMP")
-	fs.StringVar(&l.Caller, "log.caller", l.Caller, "The log call encoder specifies how the log line number is displayed in the source file, eg: long, short")
-	fs.StringVar(&l.Format, "log.format", l.Format, "Log format encoder, specify the display format of the log, eg: text, json")
-	fs.IntVar(&l.MaxVerbosity, "log.v", l.MaxVerbosity, "Specifies the maximum Verbosity value that the current logger can display")
-	return fs
+// AddFlags add related command line parameters
+func (o *Options) AddFlags(fs *pflag.FlagSet) {
+	fs.Var(&atomicLevel{lvl: &o.Level}, "log.level", "Log level to configure the "+
+		"verbosity of logging. Can be one of 'debug', 'info', 'warn', 'error', 'dpanic', 'panic', 'fatal'")
+
+	fs.BoolVar(&o.Development, "log.development", o.Development, "puts the logger in development mode")
+
+	fs.BoolVar(&o.DisableCaller, "log.disable-caller", o.DisableCaller,
+		"Completely disables automatic stacktrace capturing. By default, stacktrace are captured"+
+			" for WarnLevel and above logs in development and ErrorLevel and above in production.")
+
+	fs.BoolVar(&o.DisableStacktrace, "log.disable-stacktrace", o.DisableStacktrace,
+		"completely disables automatic stacktrace capturing. By  default, stacktrace are captured"+
+			" for WarnLevel and above logs in  development and ErrorLevel and above in production")
+
+	if o.Sampling != nil {
+		fs.IntVar(&o.Sampling.Initial, "log.sampling.initial", o.Sampling.Initial, "Set the initial value for log sampling.")
+
+		fs.IntVar(&o.Sampling.Thereafter, "log.sampling.thereafter", o.Sampling.Thereafter, "Set the thereafter value for log sampling.")
+	}
+
+	fs.StringVar(&o.Encoding, "log.encoding", o.Encoding, "sets the logger's encoding. "+
+		"Valid values are 'json' and 'console', as well as any third-party encodings registered via  RegisterEncoder.")
+
+	fs.StringArrayVar(&o.OutputPaths, "log.output-paths", o.OutputPaths, "the list of URLs or file paths to write logging output to.")
 }
 
 // Validate verify the configuration and return an error if correct
-func (l *Options) Validate() error {
-	_, err := ParseLevel(l.Level)
-	if err != nil {
-		return err
+func (o *Options) Validate() error {
+	if o.Encoding == "" {
+		return errors.New("no encoder name specified")
 	}
-	_, err = ParseCaller(l.Caller)
-	if err != nil {
-		return err
-	}
-	_, err = ParseEncoder(l.Format)
-	if err != nil {
-		return err
+
+	if !slices.Contains(encodings, o.Encoding) {
+		return fmt.Errorf("no encoder registered for name '%s'", o.Encoding)
 	}
 	return nil
 }
 
-// NewOptions Create an Options filled with default values
+// NewOptions returns a `zero` instance
 func NewOptions() *Options {
-	opt := &Options{}
-	opt.SetDefaults()
-	return opt
+	return &Options{
+		Sampling:      &zap.SamplingConfig{},
+		EncoderConfig: zapcore.EncoderConfig{},
+	}
 }

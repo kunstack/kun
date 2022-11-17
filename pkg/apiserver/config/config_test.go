@@ -15,7 +15,7 @@ package config_test
 
 import (
 	"fmt"
-	"github.com/aapelismith/kuntunnel/pkg/apiserver/config"
+	"github.com/aapelismith/kun/pkg/apiserver/config"
 	"sigs.k8s.io/yaml"
 )
 

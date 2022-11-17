@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/aapelismith/kuntunnel/pkg/apiserver/config"
-	"github.com/aapelismith/kuntunnel/pkg/log"
+	"github.com/aapelismith/kun/pkg/apiserver/config"
+	"github.com/aapelismith/kun/pkg/log"
 	"net/http"
 )
 

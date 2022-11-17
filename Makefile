@@ -12,14 +12,19 @@
 all: release
 .PHONY: all
 
-release:
-	./hack/package.sh
+release: vendor generate
+	bash -x ./hack/package.sh
 .PHONY: release
+
+vendor:
+	go mod tidy
+	go mod vendor
+.PHONY: vendor
 
 test:
 	go test -v ./...
 .PHONY: test
 
 generate:
-	bash hack/generate.sh
+	bash -x hack/generate.sh
 .PHONY: generate

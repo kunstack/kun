@@ -3,7 +3,7 @@ package auth_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/aapelismith/kuntunnel/pkg/auth"
+	"github.com/aapelismith/kun/pkg/auth"
 	"sigs.k8s.io/yaml"
 	"testing"
 )

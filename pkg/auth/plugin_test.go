@@ -3,7 +3,7 @@ package auth_test
 import (
 	"context"
 	"fmt"
-	"github.com/aapelismith/kuntunnel/pkg/auth"
+	"github.com/aapelismith/kun/pkg/auth"
 	"testing"
 )
 

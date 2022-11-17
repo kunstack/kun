@@ -2,7 +2,7 @@ package types_test
 
 import (
 	"encoding/json"
-	"github.com/aapelismith/kuntunnel/pkg/types"
+	"github.com/aapelismith/kun/pkg/types"
 	"testing"
 	"time"
 )

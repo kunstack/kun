@@ -12,17 +12,3 @@ set -e
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-PROJECT_DIR="$(dirname "$(readlink -f "$0")")"
-
-GO_BIN="$(go env GOBIN)"
-
-export PATH="$PATH:${GO_BIN:-$(go env GOPATH)/bin}"
-
-go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway \
-	github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 \
-	google.golang.org/protobuf/cmd/protoc-gen-go \
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc \
-	github.com/envoyproxy/protoc-gen-validate
-
-go generate "${PROJECT_DIR}/../..."

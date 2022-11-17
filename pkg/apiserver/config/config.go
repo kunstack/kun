@@ -15,9 +15,9 @@ package config
 
 import (
 	"fmt"
-	"github.com/aapelismith/kuntunnel/pkg/auth"
-	"github.com/aapelismith/kuntunnel/pkg/log"
-	"github.com/aapelismith/kuntunnel/pkg/types"
+	"github.com/aapelismith/kun/pkg/auth"
+	"github.com/aapelismith/kun/pkg/log"
+	"github.com/aapelismith/kun/pkg/types"
 	"github.com/spf13/pflag"
 	"golang.org/x/exp/slices"
 	"k8s.io/apimachinery/pkg/util/errors"

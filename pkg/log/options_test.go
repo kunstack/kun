@@ -14,7 +14,7 @@
 package log_test
 
 import (
-	"github.com/aapelismith/kuntunnel/pkg/log"
+	"github.com/aapelismith/kun/pkg/log"
 	"github.com/spf13/pflag"
 	"testing"
 )

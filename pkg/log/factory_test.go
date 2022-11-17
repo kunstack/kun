@@ -15,7 +15,7 @@ package log_test
 
 import (
 	"context"
-	"github.com/aapelismith/kuntunnel/pkg/log"
+	"github.com/aapelismith/kun/pkg/log"
 	"testing"
 )
 

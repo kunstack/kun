@@ -15,7 +15,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/aapelismith/kuntunnel/pkg/types"
+	"github.com/aapelismith/kun/pkg/types"
 	"time"
 )
 

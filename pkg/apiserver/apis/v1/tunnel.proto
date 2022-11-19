@@ -1,0 +1,344 @@
+/*
+Copyright 2021 The KunStack Authors.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+syntax = "proto3";
+
+package apiserver.api.v1;
+
+option go_package = "github.com/aapelismith/kun/pkg/apiserver/api/v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  schemes: [HTTPS, HTTP];
+  info: {
+    title: "Kun Tunnel Api Document";
+    version: "v1.0";
+    description: "A fast reverse proxy to help you expose a local http server behind a NAT or firewall to the internet."
+  };
+
+  security:{
+    security_requirement: {
+      key: "Authorization";
+      value: {};
+    }
+  }
+
+  security_definitions: {
+    security: {
+      key: "Authorization";
+      value: {
+        type: TYPE_API_KEY;
+        in: IN_HEADER;
+        name: 'Authorization';
+        description: "Authentication token"
+      }
+    }
+  };
+};
+
+message LoginRequest {
+  string version = 1 [
+    (validate.rules).string.min_len = 1,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"v0.0.1"';
+      description: "The version of the client application"
+    }
+  ];
+
+  string os = 2 [
+    (validate.rules).string.min_len = 1,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"darwin"';
+      description: "Type of operating system"
+    }
+  ];
+
+  string arch = 3 [
+    (validate.rules).string.min_len = 1,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"amd64"';
+      description: "Architecture of the client device";
+    }
+  ];
+
+  int64 pid = 4 [
+    (validate.rules).int64.gte = 0,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '123';
+      description: "Process ID of the client"
+    }
+  ];
+
+  int64 timestamp = 5 [
+    (validate.rules).int64.gt = 0,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '1668853293';
+      description: "Timestamp of the current client device";
+    }
+  ];
+
+  string accessKeyId = 6 [
+    (validate.rules).string.min_len = 1,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"461ebabc-757a-41be-a15d-89afbee407c9"';
+      description: "The access key id"
+    }
+  ];
+
+  string secretAccessKey = 7 [
+    (validate.rules).string.min_len = 1,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"gsk9G7uRJvzoXCgxHYyZ2Z2cK8jvq6aEqKFV3y2KAmxBGtmDkQEyrBkVkjtmi6hkNCUX9RwaJM5TFZt8"';
+      description: "The secret access key";
+    }
+  ];
+}
+
+message LoginResponse {
+  string token = 1 [
+    (validate.rules).string.min_len = 1,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"7daf60a8-3ce1-4440-85bf-34da91581089"';
+      description: "JSON Web Token."
+    }
+  ];
+
+  string expiredAt = 2 [
+    (validate.rules).string.min_len = 1,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The expiration time of the token"
+    }
+  ];
+}
+
+message WatchTunnelsRequest {
+  string hostname = 1 [
+    (validate.rules).string = {
+      hostname: true;
+      min_len: 1;
+      max_len: 253;
+    },
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"www.example.com"';
+      description: "Hostname to be watched"
+    }
+  ];
+
+  string protocol = 2 [
+    (validate.rules).string = {
+      in: ["HTTP", "HTTPS"]
+    },
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"HTTP"';
+      enum: ["HTTP", "HTTPS"];
+      description: "Protocol used for the current connection";
+    }
+  ];
+
+  int32 poolSize = 3 [
+    (validate.rules).int32.gte = 0,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '12';
+      description: "The size of the current hostname connection pool";
+    }
+  ];
+}
+
+message WatchTunnelsResponse {
+  string traceId = 1 [
+    (validate.rules).string.uuid = true,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"027833C0-4445-4E03-8B17-EBDB3C8D4F3A"';
+      description: "The id of the request link tracking";
+    }
+  ];
+
+  string tunnelToken = 2 [
+    (validate.rules).string.min_len = 1,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhIjoxfQ.Z4rGK-v6a2sWAUQdmALR3aYbXZviLr8j26a9ndx_bM4"';
+      description: "JSON Web Token for Tunnel Watching"
+    }
+  ];
+}
+
+message TunnelMessage {
+  string command = 1 [
+    (validate.rules).string = {
+      in: ["PING", "PONG", "DATA", "CLOSE", "EOF"];
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"PING"';
+      enum: ["PING", "PONG", "DATA", "CLOSE", "EOF"];
+      description: "Commands used in tunnel communication";
+    }
+  ];
+
+  bytes payload = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"0E599086-8301-48B0-8703-4D1B6F22F295"';
+      description: "The content of the payload";
+    }
+  ];
+}
+
+// BackendService is the upstream management service
+service BackendService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    description: "Upstream management service."
+  };
+
+  rpc Login (LoginRequest) returns (LoginResponse){
+    option (google.api.http) = {
+      post: "/v1/login";
+      body: "*";
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      security:{}; // disable security check
+      summary: "User login.";
+    };
+  }
+
+  // WatchTunnels watch the changes of tunnels on the server side
+  rpc WatchTunnels (WatchTunnelsRequest) returns (stream WatchTunnelsResponse){
+    option (google.api.http) = {
+      get: "/v1/tunnels";
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Watch the changes of tunnels on the server side";
+    };
+  }
+
+  // ConnectTunnel attempt to connect tunnel using token
+  rpc ConnectTunnel (stream TunnelMessage) returns (stream TunnelMessage){
+    option (google.api.http) = {
+      post: "/v1/tunnels";
+      body: "*";
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Attempt to connect tunnel using token.";
+    };
+  }
+}
+
+message WatchUpstreamsRequest {
+  google.protobuf.Timestamp startedAt = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"1970-01-01T00:00:00Z"';
+      description: "Start time of the data to be watched";
+    }
+  ];
+}
+
+message WatchUpstreamsResponse {
+  string eventType = 1 [
+    (validate.rules).string = {
+      in: ["ADDED", "MODIFIED", "DELETED"];
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"ADDED"';
+      description: "Event type of upstream change";
+    }
+  ];
+
+  string protocol = 2 [
+    (validate.rules).string = {
+      in: ["HTTP", "HTTPS"]
+    },
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"HTTP"';
+      enum: ["HTTP", "HTTPS"];
+      description: "Protocol used for the current upstream";
+    }
+  ];
+
+  string hostname = 3 [
+    (validate.rules).string = {
+      hostname: true;
+      min_len: 1;
+      max_len: 253;
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"www.example.com"';
+      description: "Host name of the current upstream";
+    }
+  ];
+
+  string accessKeyId = 4 [
+    (validate.rules).string.min_len = 1,
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"461ebabc-757a-41be-a15d-89afbee407c9"';
+      description: "The access key id"
+    }
+  ];
+
+  google.protobuf.Timestamp createdAt = 5 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"1970-01-01T00:00:00Z"';
+      description: "The creation time of the current upstream";
+    }
+  ];
+
+  google.protobuf.Timestamp updatedAt = 6 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"1970-01-01T00:00:00Z"';
+      description: "Update time of current upstream";
+    }
+  ];
+
+  google.protobuf.Timestamp deletedAt = 7 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"1970-01-01T00:00:00Z"';
+      description: "The deletion time of the current upstream";
+    }
+  ];
+}
+
+service PeerService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    description: "Peer management service."
+  };
+
+  // WatchTunnels watch the changes of upstreams on the server side
+  rpc WatchUpstreams (WatchUpstreamsRequest) returns (stream WatchUpstreamsResponse){
+    option (google.api.http) = {
+      get: "/v1/upstreams";
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Watch the changes of upstreams on the server side";
+    };
+  }
+}

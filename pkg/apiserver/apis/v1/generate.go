@@ -17,4 +17,12 @@ import (
 	_ "embed"
 )
 
-//go:generate protoc --proto_path=. --proto_path=../../../../third_party --go_opt=paths=source_relative --grpc-gateway_opt=logtostderr=true  --grpc-gateway_opt=paths=source_relative --grpc-gateway_opt=allow_delete_body=true --go-grpc_opt=paths=source_relative --validate_opt=paths=source_relative --validate_opt=lang=go --openapiv2_opt=logtostderr=true  --openapiv2_opt=allow_delete_body=true  --openapiv2_opt=use_go_templates=true --openapiv2_opt=allow_merge=true   --openapiv2_out=. --grpc-gateway_out=.  --go_out=. --go-grpc_out=.  --validate_out=.  peer.proto
+//go:generate protoc --proto_path=. --proto_path=../../../../third_party --go_opt=paths=source_relative --go_out=. tunnel.proto
+
+//go:generate protoc --proto_path=. --proto_path=../../../../third_party --validate_opt=paths=source_relative  --validate_opt=lang=go --validate_out=.  tunnel.proto
+
+//go:generate protoc --proto_path=. --proto_path=../../../../third_party --go-grpc_opt=paths=source_relative --go-grpc_out=. tunnel.proto
+
+//go:generate protoc --proto_path=. --proto_path=../../../../third_party --grpc-gateway_opt=paths=source_relative --grpc-gateway_opt=allow_delete_body=true --grpc-gateway_out=. tunnel.proto
+
+//go:generate protoc --proto_path=. --proto_path=../../../../third_party --openapiv2_opt=allow_delete_body=true --openapiv2_opt=use_go_templates=true --openapiv2_out=. tunnel.proto

@@ -38,11 +38,11 @@ type PluginInterface interface {
 	// returns an error, to allow cleaning up from partial provisioning.
 	Close() error
 
-	// HasPermission Check whether the owner of the current token has the authority of a domain name,
-	HasPermission(ctx context.Context, token, domain string) (ok bool, err error)
+	// HasPermission Check whether the owner of the current accessKeyId has the authority of a domain name,
+	HasPermission(ctx context.Context, accessKeyId, domain string) (ok bool, err error)
 
-	// Login Use accessKeyId and secretAccessKey to log in and get token
-	Login(ctx context.Context, accessKeyId, secretAccessKey string) (token string, err error)
+	// Authenticate Check if accessKeyId and secretAccessKey are correct
+	Authenticate(ctx context.Context, accessKeyId, secretAccessKey string) (ok bool, err error)
 }
 
 // RegisterPlugin registers a plugin by receiving a

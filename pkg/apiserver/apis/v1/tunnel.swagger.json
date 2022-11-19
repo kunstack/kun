@@ -1,0 +1,386 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Kun Tunnel Api Document",
+    "description": "A fast reverse proxy to help you expose a local http server behind a NAT or firewall to the internet.",
+    "version": "v1.0"
+  },
+  "tags": [
+    {
+      "name": "BackendService",
+      "description": "Upstream management service."
+    },
+    {
+      "name": "PeerService",
+      "description": "Peer management service."
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/login": {
+      "post": {
+        "summary": "User login.",
+        "operationId": "BackendService_Login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1LoginResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1LoginRequest"
+            }
+          }
+        ],
+        "tags": [
+          "BackendService"
+        ],
+        "security": []
+      }
+    },
+    "/v1/tunnels": {
+      "get": {
+        "summary": "Watch the changes of tunnels on the server side",
+        "operationId": "BackendService_WatchTunnels",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/v1WatchTunnelsResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of v1WatchTunnelsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hostname",
+            "description": "Hostname to be watched",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "protocol",
+            "description": "Protocol used for the current connection",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "poolSize",
+            "description": "The size of the current hostname connection pool",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "BackendService"
+        ]
+      },
+      "post": {
+        "summary": "Attempt to connect tunnel using token.",
+        "operationId": "BackendService_ConnectTunnel",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/v1TunnelMessage"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of v1TunnelMessage"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1TunnelMessage"
+            }
+          }
+        ],
+        "tags": [
+          "BackendService"
+        ]
+      }
+    },
+    "/v1/upstreams": {
+      "get": {
+        "summary": "Watch the changes of upstreams on the server side",
+        "operationId": "PeerService_WatchUpstreams",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/v1WatchUpstreamsResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of v1WatchUpstreamsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "startedAt",
+            "description": "Start time of the data to be watched",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        "tags": [
+          "PeerService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1LoginRequest": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "example": "v0.0.1",
+          "description": "The version of the client application"
+        },
+        "os": {
+          "type": "string",
+          "example": "darwin",
+          "description": "Type of operating system"
+        },
+        "arch": {
+          "type": "string",
+          "example": "amd64",
+          "description": "Architecture of the client device"
+        },
+        "pid": {
+          "type": "string",
+          "format": "int64",
+          "example": 123,
+          "description": "Process ID of the client"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "int64",
+          "example": 1668853293,
+          "description": "Timestamp of the current client device"
+        },
+        "accessKeyId": {
+          "type": "string",
+          "example": "461ebabc-757a-41be-a15d-89afbee407c9",
+          "description": "The access key id"
+        },
+        "secretAccessKey": {
+          "type": "string",
+          "example": "gsk9G7uRJvzoXCgxHYyZ2Z2cK8jvq6aEqKFV3y2KAmxBGtmDkQEyrBkVkjtmi6hkNCUX9RwaJM5TFZt8",
+          "description": "The secret access key"
+        }
+      }
+    },
+    "v1LoginResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "example": "7daf60a8-3ce1-4440-85bf-34da91581089",
+          "description": "JSON Web Token."
+        },
+        "expiredAt": {
+          "type": "string",
+          "description": "The expiration time of the token"
+        }
+      }
+    },
+    "v1TunnelMessage": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "example": "PING",
+          "enum": [
+            "PING",
+            "PONG",
+            "DATA",
+            "CLOSE",
+            "EOF"
+          ],
+          "description": "Commands used in tunnel communication"
+        },
+        "payload": {
+          "type": "string",
+          "format": "byte",
+          "example": "0E599086-8301-48B0-8703-4D1B6F22F295",
+          "description": "The content of the payload"
+        }
+      }
+    },
+    "v1WatchTunnelsResponse": {
+      "type": "object",
+      "properties": {
+        "traceId": {
+          "type": "string",
+          "example": "027833C0-4445-4E03-8B17-EBDB3C8D4F3A",
+          "description": "The id of the request link tracking"
+        },
+        "tunnelToken": {
+          "type": "string",
+          "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhIjoxfQ.Z4rGK-v6a2sWAUQdmALR3aYbXZviLr8j26a9ndx_bM4",
+          "description": "JSON Web Token for Tunnel Watching"
+        }
+      }
+    },
+    "v1WatchUpstreamsResponse": {
+      "type": "object",
+      "properties": {
+        "eventType": {
+          "type": "string",
+          "example": "ADDED",
+          "description": "Event type of upstream change"
+        },
+        "protocol": {
+          "type": "string",
+          "example": "HTTP",
+          "enum": [
+            "HTTP",
+            "HTTPS"
+          ],
+          "description": "Protocol used for the current upstream"
+        },
+        "hostname": {
+          "type": "string",
+          "example": "www.example.com",
+          "description": "Host name of the current upstream"
+        },
+        "accessKeyId": {
+          "type": "string",
+          "example": "461ebabc-757a-41be-a15d-89afbee407c9",
+          "description": "The access key id"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "1970-01-01T00:00:00Z",
+          "description": "The creation time of the current upstream"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "1970-01-01T00:00:00Z",
+          "description": "Update time of current upstream"
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time",
+          "example": "1970-01-01T00:00:00Z",
+          "description": "The deletion time of the current upstream"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Authorization": {
+      "type": "apiKey",
+      "description": "Authentication token",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "Authorization": []
+    }
+  ]
+}

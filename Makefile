@@ -13,7 +13,7 @@ all: release
 .PHONY: all
 
 release: vendor generate
-	bash -x ./hack/package.sh
+	./hack/package.sh
 .PHONY: release
 
 vendor:
@@ -26,5 +26,5 @@ test:
 .PHONY: test
 
 generate:
-	bash -x hack/generate.sh
+	./hack/generate.sh
 .PHONY: generate

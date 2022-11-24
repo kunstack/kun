@@ -18,40 +18,40 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// BackendServiceClient is the client API for BackendService service.
+// BackendControllerClient is the client API for BackendController service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type BackendServiceClient interface {
+type BackendControllerClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	// WatchTunnels watch the changes of tunnels on the server side
-	WatchTunnels(ctx context.Context, in *WatchTunnelsRequest, opts ...grpc.CallOption) (BackendService_WatchTunnelsClient, error)
+	WatchTunnels(ctx context.Context, in *WatchTunnelsRequest, opts ...grpc.CallOption) (BackendController_WatchTunnelsClient, error)
 	// ConnectTunnel attempt to connect tunnel using token
-	ConnectTunnel(ctx context.Context, opts ...grpc.CallOption) (BackendService_ConnectTunnelClient, error)
+	ConnectTunnel(ctx context.Context, opts ...grpc.CallOption) (BackendController_ConnectTunnelClient, error)
 }
 
-type backendServiceClient struct {
+type backendControllerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewBackendServiceClient(cc grpc.ClientConnInterface) BackendServiceClient {
-	return &backendServiceClient{cc}
+func NewBackendControllerClient(cc grpc.ClientConnInterface) BackendControllerClient {
+	return &backendControllerClient{cc}
 }
 
-func (c *backendServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+func (c *backendControllerClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, "/apiserver.api.v1.BackendService/Login", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/apiserver.api.v1.BackendController/Login", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *backendServiceClient) WatchTunnels(ctx context.Context, in *WatchTunnelsRequest, opts ...grpc.CallOption) (BackendService_WatchTunnelsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &BackendService_ServiceDesc.Streams[0], "/apiserver.api.v1.BackendService/WatchTunnels", opts...)
+func (c *backendControllerClient) WatchTunnels(ctx context.Context, in *WatchTunnelsRequest, opts ...grpc.CallOption) (BackendController_WatchTunnelsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &BackendController_ServiceDesc.Streams[0], "/apiserver.api.v1.BackendController/WatchTunnels", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &backendServiceWatchTunnelsClient{stream}
+	x := &backendControllerWatchTunnelsClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -61,16 +61,16 @@ func (c *backendServiceClient) WatchTunnels(ctx context.Context, in *WatchTunnel
 	return x, nil
 }
 
-type BackendService_WatchTunnelsClient interface {
+type BackendController_WatchTunnelsClient interface {
 	Recv() (*WatchTunnelsResponse, error)
 	grpc.ClientStream
 }
 
-type backendServiceWatchTunnelsClient struct {
+type backendControllerWatchTunnelsClient struct {
 	grpc.ClientStream
 }
 
-func (x *backendServiceWatchTunnelsClient) Recv() (*WatchTunnelsResponse, error) {
+func (x *backendControllerWatchTunnelsClient) Recv() (*WatchTunnelsResponse, error) {
 	m := new(WatchTunnelsResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -78,30 +78,30 @@ func (x *backendServiceWatchTunnelsClient) Recv() (*WatchTunnelsResponse, error)
 	return m, nil
 }
 
-func (c *backendServiceClient) ConnectTunnel(ctx context.Context, opts ...grpc.CallOption) (BackendService_ConnectTunnelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &BackendService_ServiceDesc.Streams[1], "/apiserver.api.v1.BackendService/ConnectTunnel", opts...)
+func (c *backendControllerClient) ConnectTunnel(ctx context.Context, opts ...grpc.CallOption) (BackendController_ConnectTunnelClient, error) {
+	stream, err := c.cc.NewStream(ctx, &BackendController_ServiceDesc.Streams[1], "/apiserver.api.v1.BackendController/ConnectTunnel", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &backendServiceConnectTunnelClient{stream}
+	x := &backendControllerConnectTunnelClient{stream}
 	return x, nil
 }
 
-type BackendService_ConnectTunnelClient interface {
+type BackendController_ConnectTunnelClient interface {
 	Send(*TunnelMessage) error
 	Recv() (*TunnelMessage, error)
 	grpc.ClientStream
 }
 
-type backendServiceConnectTunnelClient struct {
+type backendControllerConnectTunnelClient struct {
 	grpc.ClientStream
 }
 
-func (x *backendServiceConnectTunnelClient) Send(m *TunnelMessage) error {
+func (x *backendControllerConnectTunnelClient) Send(m *TunnelMessage) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *backendServiceConnectTunnelClient) Recv() (*TunnelMessage, error) {
+func (x *backendControllerConnectTunnelClient) Recv() (*TunnelMessage, error) {
 	m := new(TunnelMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -109,102 +109,102 @@ func (x *backendServiceConnectTunnelClient) Recv() (*TunnelMessage, error) {
 	return m, nil
 }
 
-// BackendServiceServer is the server API for BackendService service.
-// All implementations must embed UnimplementedBackendServiceServer
+// BackendControllerServer is the server API for BackendController service.
+// All implementations must embed UnimplementedBackendControllerServer
 // for forward compatibility
-type BackendServiceServer interface {
+type BackendControllerServer interface {
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	// WatchTunnels watch the changes of tunnels on the server side
-	WatchTunnels(*WatchTunnelsRequest, BackendService_WatchTunnelsServer) error
+	WatchTunnels(*WatchTunnelsRequest, BackendController_WatchTunnelsServer) error
 	// ConnectTunnel attempt to connect tunnel using token
-	ConnectTunnel(BackendService_ConnectTunnelServer) error
-	mustEmbedUnimplementedBackendServiceServer()
+	ConnectTunnel(BackendController_ConnectTunnelServer) error
+	mustEmbedUnimplementedBackendControllerServer()
 }
 
-// UnimplementedBackendServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedBackendServiceServer struct {
+// UnimplementedBackendControllerServer must be embedded to have forward compatible implementations.
+type UnimplementedBackendControllerServer struct {
 }
 
-func (UnimplementedBackendServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
+func (UnimplementedBackendControllerServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedBackendServiceServer) WatchTunnels(*WatchTunnelsRequest, BackendService_WatchTunnelsServer) error {
+func (UnimplementedBackendControllerServer) WatchTunnels(*WatchTunnelsRequest, BackendController_WatchTunnelsServer) error {
 	return status.Errorf(codes.Unimplemented, "method WatchTunnels not implemented")
 }
-func (UnimplementedBackendServiceServer) ConnectTunnel(BackendService_ConnectTunnelServer) error {
+func (UnimplementedBackendControllerServer) ConnectTunnel(BackendController_ConnectTunnelServer) error {
 	return status.Errorf(codes.Unimplemented, "method ConnectTunnel not implemented")
 }
-func (UnimplementedBackendServiceServer) mustEmbedUnimplementedBackendServiceServer() {}
+func (UnimplementedBackendControllerServer) mustEmbedUnimplementedBackendControllerServer() {}
 
-// UnsafeBackendServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to BackendServiceServer will
+// UnsafeBackendControllerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to BackendControllerServer will
 // result in compilation errors.
-type UnsafeBackendServiceServer interface {
-	mustEmbedUnimplementedBackendServiceServer()
+type UnsafeBackendControllerServer interface {
+	mustEmbedUnimplementedBackendControllerServer()
 }
 
-func RegisterBackendServiceServer(s grpc.ServiceRegistrar, srv BackendServiceServer) {
-	s.RegisterService(&BackendService_ServiceDesc, srv)
+func RegisterBackendControllerServer(s grpc.ServiceRegistrar, srv BackendControllerServer) {
+	s.RegisterService(&BackendController_ServiceDesc, srv)
 }
 
-func _BackendService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _BackendController_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LoginRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BackendServiceServer).Login(ctx, in)
+		return srv.(BackendControllerServer).Login(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/apiserver.api.v1.BackendService/Login",
+		FullMethod: "/apiserver.api.v1.BackendController/Login",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BackendServiceServer).Login(ctx, req.(*LoginRequest))
+		return srv.(BackendControllerServer).Login(ctx, req.(*LoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BackendService_WatchTunnels_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _BackendController_WatchTunnels_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(WatchTunnelsRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(BackendServiceServer).WatchTunnels(m, &backendServiceWatchTunnelsServer{stream})
+	return srv.(BackendControllerServer).WatchTunnels(m, &backendControllerWatchTunnelsServer{stream})
 }
 
-type BackendService_WatchTunnelsServer interface {
+type BackendController_WatchTunnelsServer interface {
 	Send(*WatchTunnelsResponse) error
 	grpc.ServerStream
 }
 
-type backendServiceWatchTunnelsServer struct {
+type backendControllerWatchTunnelsServer struct {
 	grpc.ServerStream
 }
 
-func (x *backendServiceWatchTunnelsServer) Send(m *WatchTunnelsResponse) error {
+func (x *backendControllerWatchTunnelsServer) Send(m *WatchTunnelsResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _BackendService_ConnectTunnel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(BackendServiceServer).ConnectTunnel(&backendServiceConnectTunnelServer{stream})
+func _BackendController_ConnectTunnel_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BackendControllerServer).ConnectTunnel(&backendControllerConnectTunnelServer{stream})
 }
 
-type BackendService_ConnectTunnelServer interface {
+type BackendController_ConnectTunnelServer interface {
 	Send(*TunnelMessage) error
 	Recv() (*TunnelMessage, error)
 	grpc.ServerStream
 }
 
-type backendServiceConnectTunnelServer struct {
+type backendControllerConnectTunnelServer struct {
 	grpc.ServerStream
 }
 
-func (x *backendServiceConnectTunnelServer) Send(m *TunnelMessage) error {
+func (x *backendControllerConnectTunnelServer) Send(m *TunnelMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *backendServiceConnectTunnelServer) Recv() (*TunnelMessage, error) {
+func (x *backendControllerConnectTunnelServer) Recv() (*TunnelMessage, error) {
 	m := new(TunnelMessage)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -212,27 +212,27 @@ func (x *backendServiceConnectTunnelServer) Recv() (*TunnelMessage, error) {
 	return m, nil
 }
 
-// BackendService_ServiceDesc is the grpc.ServiceDesc for BackendService service.
+// BackendController_ServiceDesc is the grpc.ServiceDesc for BackendController service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var BackendService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "apiserver.api.v1.BackendService",
-	HandlerType: (*BackendServiceServer)(nil),
+var BackendController_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "apiserver.api.v1.BackendController",
+	HandlerType: (*BackendControllerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Login",
-			Handler:    _BackendService_Login_Handler,
+			Handler:    _BackendController_Login_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "WatchTunnels",
-			Handler:       _BackendService_WatchTunnels_Handler,
+			Handler:       _BackendController_WatchTunnels_Handler,
 			ServerStreams: true,
 		},
 		{
 			StreamName:    "ConnectTunnel",
-			Handler:       _BackendService_ConnectTunnel_Handler,
+			Handler:       _BackendController_ConnectTunnel_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},
@@ -240,28 +240,30 @@ var BackendService_ServiceDesc = grpc.ServiceDesc{
 	Metadata: "tunnel.proto",
 }
 
-// PeerServiceClient is the client API for PeerService service.
+// PeerControllerClient is the client API for PeerController service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type PeerServiceClient interface {
+type PeerControllerClient interface {
 	// WatchTunnels watch the changes of upstreams on the server side
-	WatchUpstreams(ctx context.Context, in *WatchUpstreamsRequest, opts ...grpc.CallOption) (PeerService_WatchUpstreamsClient, error)
+	WatchUpstreams(ctx context.Context, in *WatchUpstreamsRequest, opts ...grpc.CallOption) (PeerController_WatchUpstreamsClient, error)
+	// ConnectUpstream attempt to connect tunnel using token
+	ConnectUpstream(ctx context.Context, opts ...grpc.CallOption) (PeerController_ConnectUpstreamClient, error)
 }
 
-type peerServiceClient struct {
+type peerControllerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewPeerServiceClient(cc grpc.ClientConnInterface) PeerServiceClient {
-	return &peerServiceClient{cc}
+func NewPeerControllerClient(cc grpc.ClientConnInterface) PeerControllerClient {
+	return &peerControllerClient{cc}
 }
 
-func (c *peerServiceClient) WatchUpstreams(ctx context.Context, in *WatchUpstreamsRequest, opts ...grpc.CallOption) (PeerService_WatchUpstreamsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &PeerService_ServiceDesc.Streams[0], "/apiserver.api.v1.PeerService/WatchUpstreams", opts...)
+func (c *peerControllerClient) WatchUpstreams(ctx context.Context, in *WatchUpstreamsRequest, opts ...grpc.CallOption) (PeerController_WatchUpstreamsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PeerController_ServiceDesc.Streams[0], "/apiserver.api.v1.PeerController/WatchUpstreams", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &peerServiceWatchUpstreamsClient{stream}
+	x := &peerControllerWatchUpstreamsClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -271,16 +273,16 @@ func (c *peerServiceClient) WatchUpstreams(ctx context.Context, in *WatchUpstrea
 	return x, nil
 }
 
-type PeerService_WatchUpstreamsClient interface {
+type PeerController_WatchUpstreamsClient interface {
 	Recv() (*WatchUpstreamsResponse, error)
 	grpc.ClientStream
 }
 
-type peerServiceWatchUpstreamsClient struct {
+type peerControllerWatchUpstreamsClient struct {
 	grpc.ClientStream
 }
 
-func (x *peerServiceWatchUpstreamsClient) Recv() (*WatchUpstreamsResponse, error) {
+func (x *peerControllerWatchUpstreamsClient) Recv() (*WatchUpstreamsResponse, error) {
 	m := new(WatchUpstreamsResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -288,68 +290,136 @@ func (x *peerServiceWatchUpstreamsClient) Recv() (*WatchUpstreamsResponse, error
 	return m, nil
 }
 
-// PeerServiceServer is the server API for PeerService service.
-// All implementations must embed UnimplementedPeerServiceServer
+func (c *peerControllerClient) ConnectUpstream(ctx context.Context, opts ...grpc.CallOption) (PeerController_ConnectUpstreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PeerController_ServiceDesc.Streams[1], "/apiserver.api.v1.PeerController/ConnectUpstream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &peerControllerConnectUpstreamClient{stream}
+	return x, nil
+}
+
+type PeerController_ConnectUpstreamClient interface {
+	Send(*ConnectUpstreamRequest) error
+	Recv() (*ConnectUpstreamResponse, error)
+	grpc.ClientStream
+}
+
+type peerControllerConnectUpstreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *peerControllerConnectUpstreamClient) Send(m *ConnectUpstreamRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *peerControllerConnectUpstreamClient) Recv() (*ConnectUpstreamResponse, error) {
+	m := new(ConnectUpstreamResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// PeerControllerServer is the server API for PeerController service.
+// All implementations must embed UnimplementedPeerControllerServer
 // for forward compatibility
-type PeerServiceServer interface {
+type PeerControllerServer interface {
 	// WatchTunnels watch the changes of upstreams on the server side
-	WatchUpstreams(*WatchUpstreamsRequest, PeerService_WatchUpstreamsServer) error
-	mustEmbedUnimplementedPeerServiceServer()
+	WatchUpstreams(*WatchUpstreamsRequest, PeerController_WatchUpstreamsServer) error
+	// ConnectUpstream attempt to connect tunnel using token
+	ConnectUpstream(PeerController_ConnectUpstreamServer) error
+	mustEmbedUnimplementedPeerControllerServer()
 }
 
-// UnimplementedPeerServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedPeerServiceServer struct {
+// UnimplementedPeerControllerServer must be embedded to have forward compatible implementations.
+type UnimplementedPeerControllerServer struct {
 }
 
-func (UnimplementedPeerServiceServer) WatchUpstreams(*WatchUpstreamsRequest, PeerService_WatchUpstreamsServer) error {
+func (UnimplementedPeerControllerServer) WatchUpstreams(*WatchUpstreamsRequest, PeerController_WatchUpstreamsServer) error {
 	return status.Errorf(codes.Unimplemented, "method WatchUpstreams not implemented")
 }
-func (UnimplementedPeerServiceServer) mustEmbedUnimplementedPeerServiceServer() {}
+func (UnimplementedPeerControllerServer) ConnectUpstream(PeerController_ConnectUpstreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method ConnectUpstream not implemented")
+}
+func (UnimplementedPeerControllerServer) mustEmbedUnimplementedPeerControllerServer() {}
 
-// UnsafePeerServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to PeerServiceServer will
+// UnsafePeerControllerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to PeerControllerServer will
 // result in compilation errors.
-type UnsafePeerServiceServer interface {
-	mustEmbedUnimplementedPeerServiceServer()
+type UnsafePeerControllerServer interface {
+	mustEmbedUnimplementedPeerControllerServer()
 }
 
-func RegisterPeerServiceServer(s grpc.ServiceRegistrar, srv PeerServiceServer) {
-	s.RegisterService(&PeerService_ServiceDesc, srv)
+func RegisterPeerControllerServer(s grpc.ServiceRegistrar, srv PeerControllerServer) {
+	s.RegisterService(&PeerController_ServiceDesc, srv)
 }
 
-func _PeerService_WatchUpstreams_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _PeerController_WatchUpstreams_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(WatchUpstreamsRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(PeerServiceServer).WatchUpstreams(m, &peerServiceWatchUpstreamsServer{stream})
+	return srv.(PeerControllerServer).WatchUpstreams(m, &peerControllerWatchUpstreamsServer{stream})
 }
 
-type PeerService_WatchUpstreamsServer interface {
+type PeerController_WatchUpstreamsServer interface {
 	Send(*WatchUpstreamsResponse) error
 	grpc.ServerStream
 }
 
-type peerServiceWatchUpstreamsServer struct {
+type peerControllerWatchUpstreamsServer struct {
 	grpc.ServerStream
 }
 
-func (x *peerServiceWatchUpstreamsServer) Send(m *WatchUpstreamsResponse) error {
+func (x *peerControllerWatchUpstreamsServer) Send(m *WatchUpstreamsResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-// PeerService_ServiceDesc is the grpc.ServiceDesc for PeerService service.
+func _PeerController_ConnectUpstream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(PeerControllerServer).ConnectUpstream(&peerControllerConnectUpstreamServer{stream})
+}
+
+type PeerController_ConnectUpstreamServer interface {
+	Send(*ConnectUpstreamResponse) error
+	Recv() (*ConnectUpstreamRequest, error)
+	grpc.ServerStream
+}
+
+type peerControllerConnectUpstreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *peerControllerConnectUpstreamServer) Send(m *ConnectUpstreamResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *peerControllerConnectUpstreamServer) Recv() (*ConnectUpstreamRequest, error) {
+	m := new(ConnectUpstreamRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// PeerController_ServiceDesc is the grpc.ServiceDesc for PeerController service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var PeerService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "apiserver.api.v1.PeerService",
-	HandlerType: (*PeerServiceServer)(nil),
+var PeerController_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "apiserver.api.v1.PeerController",
+	HandlerType: (*PeerControllerServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "WatchUpstreams",
-			Handler:       _PeerService_WatchUpstreams_Handler,
+			Handler:       _PeerController_WatchUpstreams_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "ConnectUpstream",
+			Handler:       _PeerController_ConnectUpstream_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "tunnel.proto",

@@ -13,7 +13,7 @@ type PeerServer struct {
 	cfg *config.Configuration
 }
 
-//Start the peer http server
+// Start the peer http server
 func (s *PeerServer) Start(baseCtx context.Context) error {
 	ctx, cancel := context.WithCancel(baseCtx)
 	defer cancel()
@@ -39,7 +39,7 @@ func (s *PeerServer) Start(baseCtx context.Context) error {
 	return nil
 }
 
-//GracefulStop graceful shutdown http server
+// GracefulStop graceful shutdown http server
 func (s *PeerServer) GracefulStop(ctx context.Context) error {
 	l := log.FromContext(ctx).Sugar()
 

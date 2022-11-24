@@ -31,7 +31,7 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_BackendService_Login_0(ctx context.Context, marshaler runtime.Marshaler, client BackendServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_BackendController_Login_0(ctx context.Context, marshaler runtime.Marshaler, client BackendControllerClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq LoginRequest
 	var metadata runtime.ServerMetadata
 
@@ -48,7 +48,7 @@ func request_BackendService_Login_0(ctx context.Context, marshaler runtime.Marsh
 
 }
 
-func local_request_BackendService_Login_0(ctx context.Context, marshaler runtime.Marshaler, server BackendServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_BackendController_Login_0(ctx context.Context, marshaler runtime.Marshaler, server BackendControllerServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq LoginRequest
 	var metadata runtime.ServerMetadata
 
@@ -66,17 +66,17 @@ func local_request_BackendService_Login_0(ctx context.Context, marshaler runtime
 }
 
 var (
-	filter_BackendService_WatchTunnels_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_BackendController_WatchTunnels_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
-func request_BackendService_WatchTunnels_0(ctx context.Context, marshaler runtime.Marshaler, client BackendServiceClient, req *http.Request, pathParams map[string]string) (BackendService_WatchTunnelsClient, runtime.ServerMetadata, error) {
+func request_BackendController_WatchTunnels_0(ctx context.Context, marshaler runtime.Marshaler, client BackendControllerClient, req *http.Request, pathParams map[string]string) (BackendController_WatchTunnelsClient, runtime.ServerMetadata, error) {
 	var protoReq WatchTunnelsRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BackendService_WatchTunnels_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BackendController_WatchTunnels_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -93,7 +93,7 @@ func request_BackendService_WatchTunnels_0(ctx context.Context, marshaler runtim
 
 }
 
-func request_BackendService_ConnectTunnel_0(ctx context.Context, marshaler runtime.Marshaler, client BackendServiceClient, req *http.Request, pathParams map[string]string) (BackendService_ConnectTunnelClient, runtime.ServerMetadata, error) {
+func request_BackendController_ConnectTunnel_0(ctx context.Context, marshaler runtime.Marshaler, client BackendControllerClient, req *http.Request, pathParams map[string]string) (BackendController_ConnectTunnelClient, runtime.ServerMetadata, error) {
 	var metadata runtime.ServerMetadata
 	stream, err := client.ConnectTunnel(ctx)
 	if err != nil {
@@ -137,17 +137,17 @@ func request_BackendService_ConnectTunnel_0(ctx context.Context, marshaler runti
 }
 
 var (
-	filter_PeerService_WatchUpstreams_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_PeerController_WatchUpstreams_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 )
 
-func request_PeerService_WatchUpstreams_0(ctx context.Context, marshaler runtime.Marshaler, client PeerServiceClient, req *http.Request, pathParams map[string]string) (PeerService_WatchUpstreamsClient, runtime.ServerMetadata, error) {
+func request_PeerController_WatchUpstreams_0(ctx context.Context, marshaler runtime.Marshaler, client PeerControllerClient, req *http.Request, pathParams map[string]string) (PeerController_WatchUpstreamsClient, runtime.ServerMetadata, error) {
 	var protoReq WatchUpstreamsRequest
 	var metadata runtime.ServerMetadata
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_PeerService_WatchUpstreams_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_PeerController_WatchUpstreams_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -164,13 +164,56 @@ func request_PeerService_WatchUpstreams_0(ctx context.Context, marshaler runtime
 
 }
 
-// RegisterBackendServiceHandlerServer registers the http handlers for service BackendService to "mux".
-// UnaryRPC     :call BackendServiceServer directly.
-// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterBackendServiceHandlerFromEndpoint instead.
-func RegisterBackendServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server BackendServiceServer) error {
+func request_PeerController_ConnectUpstream_0(ctx context.Context, marshaler runtime.Marshaler, client PeerControllerClient, req *http.Request, pathParams map[string]string) (PeerController_ConnectUpstreamClient, runtime.ServerMetadata, error) {
+	var metadata runtime.ServerMetadata
+	stream, err := client.ConnectUpstream(ctx)
+	if err != nil {
+		grpclog.Infof("Failed to start streaming: %v", err)
+		return nil, metadata, err
+	}
+	dec := marshaler.NewDecoder(req.Body)
+	handleSend := func() error {
+		var protoReq ConnectUpstreamRequest
+		err := dec.Decode(&protoReq)
+		if err == io.EOF {
+			return err
+		}
+		if err != nil {
+			grpclog.Infof("Failed to decode request: %v", err)
+			return err
+		}
+		if err := stream.Send(&protoReq); err != nil {
+			grpclog.Infof("Failed to send request: %v", err)
+			return err
+		}
+		return nil
+	}
+	go func() {
+		for {
+			if err := handleSend(); err != nil {
+				break
+			}
+		}
+		if err := stream.CloseSend(); err != nil {
+			grpclog.Infof("Failed to terminate client stream: %v", err)
+		}
+	}()
+	header, err := stream.Header()
+	if err != nil {
+		grpclog.Infof("Failed to get header from client: %v", err)
+		return nil, metadata, err
+	}
+	metadata.HeaderMD = header
+	return stream, metadata, nil
+}
 
-	mux.Handle("POST", pattern_BackendService_Login_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+// RegisterBackendControllerHandlerServer registers the http handlers for service BackendController to "mux".
+// UnaryRPC     :call BackendControllerServer directly.
+// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterBackendControllerHandlerFromEndpoint instead.
+func RegisterBackendControllerHandlerServer(ctx context.Context, mux *runtime.ServeMux, server BackendControllerServer) error {
+
+	mux.Handle("POST", pattern_BackendController_Login_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -178,12 +221,12 @@ func RegisterBackendServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/apiserver.api.v1.BackendService/Login", runtime.WithHTTPPathPattern("/v1/login"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/apiserver.api.v1.BackendController/Login", runtime.WithHTTPPathPattern("/v1/login"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_BackendService_Login_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_BackendController_Login_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -191,18 +234,18 @@ func RegisterBackendServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 			return
 		}
 
-		forward_BackendService_Login_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BackendController_Login_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_BackendService_WatchTunnels_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_BackendController_WatchTunnels_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 		return
 	})
 
-	mux.Handle("POST", pattern_BackendService_ConnectTunnel_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_BackendController_ConnectTunnel_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -212,13 +255,20 @@ func RegisterBackendServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 	return nil
 }
 
-// RegisterPeerServiceHandlerServer registers the http handlers for service PeerService to "mux".
-// UnaryRPC     :call PeerServiceServer directly.
+// RegisterPeerControllerHandlerServer registers the http handlers for service PeerController to "mux".
+// UnaryRPC     :call PeerControllerServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterPeerServiceHandlerFromEndpoint instead.
-func RegisterPeerServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server PeerServiceServer) error {
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterPeerControllerHandlerFromEndpoint instead.
+func RegisterPeerControllerHandlerServer(ctx context.Context, mux *runtime.ServeMux, server PeerControllerServer) error {
 
-	mux.Handle("GET", pattern_PeerService_WatchUpstreams_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_PeerController_WatchUpstreams_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
+		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+		return
+	})
+
+	mux.Handle("POST", pattern_PeerController_ConnectUpstream_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		err := status.Error(codes.Unimplemented, "streaming calls are not yet supported in the in-process transport")
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
@@ -228,9 +278,9 @@ func RegisterPeerServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 	return nil
 }
 
-// RegisterBackendServiceHandlerFromEndpoint is same as RegisterBackendServiceHandler but
+// RegisterBackendControllerHandlerFromEndpoint is same as RegisterBackendControllerHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterBackendServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterBackendControllerHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -250,85 +300,85 @@ func RegisterBackendServiceHandlerFromEndpoint(ctx context.Context, mux *runtime
 		}()
 	}()
 
-	return RegisterBackendServiceHandler(ctx, mux, conn)
+	return RegisterBackendControllerHandler(ctx, mux, conn)
 }
 
-// RegisterBackendServiceHandler registers the http handlers for service BackendService to "mux".
+// RegisterBackendControllerHandler registers the http handlers for service BackendController to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterBackendServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterBackendServiceHandlerClient(ctx, mux, NewBackendServiceClient(conn))
+func RegisterBackendControllerHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterBackendControllerHandlerClient(ctx, mux, NewBackendControllerClient(conn))
 }
 
-// RegisterBackendServiceHandlerClient registers the http handlers for service BackendService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "BackendServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "BackendServiceClient"
+// RegisterBackendControllerHandlerClient registers the http handlers for service BackendController
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "BackendControllerClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "BackendControllerClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "BackendServiceClient" to call the correct interceptors.
-func RegisterBackendServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client BackendServiceClient) error {
+// "BackendControllerClient" to call the correct interceptors.
+func RegisterBackendControllerHandlerClient(ctx context.Context, mux *runtime.ServeMux, client BackendControllerClient) error {
 
-	mux.Handle("POST", pattern_BackendService_Login_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_BackendController_Login_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/apiserver.api.v1.BackendService/Login", runtime.WithHTTPPathPattern("/v1/login"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/apiserver.api.v1.BackendController/Login", runtime.WithHTTPPathPattern("/v1/login"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_BackendService_Login_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BackendController_Login_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_BackendService_Login_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_BackendController_Login_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("GET", pattern_BackendService_WatchTunnels_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_BackendController_WatchTunnels_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/apiserver.api.v1.BackendService/WatchTunnels", runtime.WithHTTPPathPattern("/v1/tunnels"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/apiserver.api.v1.BackendController/WatchTunnels", runtime.WithHTTPPathPattern("/v1/tunnels"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_BackendService_WatchTunnels_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BackendController_WatchTunnels_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_BackendService_WatchTunnels_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+		forward_BackendController_WatchTunnels_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
-	mux.Handle("POST", pattern_BackendService_ConnectTunnel_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("POST", pattern_BackendController_ConnectTunnel_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/apiserver.api.v1.BackendService/ConnectTunnel", runtime.WithHTTPPathPattern("/v1/tunnels"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/apiserver.api.v1.BackendController/ConnectTunnel", runtime.WithHTTPPathPattern("/v1/tunnels"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_BackendService_ConnectTunnel_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_BackendController_ConnectTunnel_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_BackendService_ConnectTunnel_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+		forward_BackendController_ConnectTunnel_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -336,24 +386,24 @@ func RegisterBackendServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_BackendService_Login_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "login"}, ""))
+	pattern_BackendController_Login_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "login"}, ""))
 
-	pattern_BackendService_WatchTunnels_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "tunnels"}, ""))
+	pattern_BackendController_WatchTunnels_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "tunnels"}, ""))
 
-	pattern_BackendService_ConnectTunnel_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "tunnels"}, ""))
+	pattern_BackendController_ConnectTunnel_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "tunnels"}, ""))
 )
 
 var (
-	forward_BackendService_Login_0 = runtime.ForwardResponseMessage
+	forward_BackendController_Login_0 = runtime.ForwardResponseMessage
 
-	forward_BackendService_WatchTunnels_0 = runtime.ForwardResponseStream
+	forward_BackendController_WatchTunnels_0 = runtime.ForwardResponseStream
 
-	forward_BackendService_ConnectTunnel_0 = runtime.ForwardResponseStream
+	forward_BackendController_ConnectTunnel_0 = runtime.ForwardResponseStream
 )
 
-// RegisterPeerServiceHandlerFromEndpoint is same as RegisterPeerServiceHandler but
+// RegisterPeerControllerHandlerFromEndpoint is same as RegisterPeerControllerHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterPeerServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterPeerControllerHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.Dial(endpoint, opts...)
 	if err != nil {
 		return err
@@ -373,41 +423,63 @@ func RegisterPeerServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.Se
 		}()
 	}()
 
-	return RegisterPeerServiceHandler(ctx, mux, conn)
+	return RegisterPeerControllerHandler(ctx, mux, conn)
 }
 
-// RegisterPeerServiceHandler registers the http handlers for service PeerService to "mux".
+// RegisterPeerControllerHandler registers the http handlers for service PeerController to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterPeerServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterPeerServiceHandlerClient(ctx, mux, NewPeerServiceClient(conn))
+func RegisterPeerControllerHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterPeerControllerHandlerClient(ctx, mux, NewPeerControllerClient(conn))
 }
 
-// RegisterPeerServiceHandlerClient registers the http handlers for service PeerService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "PeerServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "PeerServiceClient"
+// RegisterPeerControllerHandlerClient registers the http handlers for service PeerController
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "PeerControllerClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "PeerControllerClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "PeerServiceClient" to call the correct interceptors.
-func RegisterPeerServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client PeerServiceClient) error {
+// "PeerControllerClient" to call the correct interceptors.
+func RegisterPeerControllerHandlerClient(ctx context.Context, mux *runtime.ServeMux, client PeerControllerClient) error {
 
-	mux.Handle("GET", pattern_PeerService_WatchUpstreams_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_PeerController_WatchUpstreams_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/apiserver.api.v1.PeerService/WatchUpstreams", runtime.WithHTTPPathPattern("/v1/upstreams"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/apiserver.api.v1.PeerController/WatchUpstreams", runtime.WithHTTPPathPattern("/v1/upstreams"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_PeerService_WatchUpstreams_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_PeerController_WatchUpstreams_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_PeerService_WatchUpstreams_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+		forward_PeerController_WatchUpstreams_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
+
+	})
+
+	mux.Handle("POST", pattern_PeerController_ConnectUpstream_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		var err error
+		var annotatedContext context.Context
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/apiserver.api.v1.PeerController/ConnectUpstream", runtime.WithHTTPPathPattern("/v1/upstreams"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_PeerController_ConnectUpstream_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_PeerController_ConnectUpstream_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -415,9 +487,13 @@ func RegisterPeerServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 }
 
 var (
-	pattern_PeerService_WatchUpstreams_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "upstreams"}, ""))
+	pattern_PeerController_WatchUpstreams_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "upstreams"}, ""))
+
+	pattern_PeerController_ConnectUpstream_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "upstreams"}, ""))
 )
 
 var (
-	forward_PeerService_WatchUpstreams_0 = runtime.ForwardResponseStream
+	forward_PeerController_WatchUpstreams_0 = runtime.ForwardResponseStream
+
+	forward_PeerController_ConnectUpstream_0 = runtime.ForwardResponseStream
 )

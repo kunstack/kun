@@ -7,11 +7,11 @@
   },
   "tags": [
     {
-      "name": "BackendService",
+      "name": "BackendController",
       "description": "Upstream management service."
     },
     {
-      "name": "PeerService",
+      "name": "PeerController",
       "description": "Peer management service."
     }
   ],
@@ -29,7 +29,7 @@
     "/v1/login": {
       "post": {
         "summary": "User login.",
-        "operationId": "BackendService_Login",
+        "operationId": "BackendController_Login",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -55,7 +55,7 @@
           }
         ],
         "tags": [
-          "BackendService"
+          "BackendController"
         ],
         "security": []
       }
@@ -63,7 +63,7 @@
     "/v1/tunnels": {
       "get": {
         "summary": "Watch the changes of tunnels on the server side",
-        "operationId": "BackendService_WatchTunnels",
+        "operationId": "BackendController_WatchTunnels",
         "responses": {
           "200": {
             "description": "A successful response.(streaming responses)",
@@ -112,12 +112,12 @@
           }
         ],
         "tags": [
-          "BackendService"
+          "BackendController"
         ]
       },
       "post": {
         "summary": "Attempt to connect tunnel using token.",
-        "operationId": "BackendService_ConnectTunnel",
+        "operationId": "BackendController_ConnectTunnel",
         "responses": {
           "200": {
             "description": "A successful response.(streaming responses)",
@@ -153,14 +153,14 @@
           }
         ],
         "tags": [
-          "BackendService"
+          "BackendController"
         ]
       }
     },
     "/v1/upstreams": {
       "get": {
         "summary": "Watch the changes of upstreams on the server side",
-        "operationId": "PeerService_WatchUpstreams",
+        "operationId": "PeerController_WatchUpstreams",
         "responses": {
           "200": {
             "description": "A successful response.(streaming responses)",
@@ -195,7 +195,48 @@
           }
         ],
         "tags": [
-          "PeerService"
+          "PeerController"
+        ]
+      },
+      "post": {
+        "summary": "Attempt to connect upstream using id.",
+        "operationId": "PeerController_ConnectUpstream",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/definitions/v1ConnectUpstreamResponse"
+                },
+                "error": {
+                  "$ref": "#/definitions/rpcStatus"
+                }
+              },
+              "title": "Stream result of v1ConnectUpstreamResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " (streaming inputs)",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ConnectUpstreamRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PeerController"
         ]
       }
     }
@@ -225,6 +266,54 @@
           "items": {
             "$ref": "#/definitions/protobufAny"
           }
+        }
+      }
+    },
+    "v1ConnectUpstreamRequest": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "example": "INIT",
+          "enum": [
+            "INIT",
+            "PING",
+            "PONG",
+            "PUSH",
+            "FINISH",
+            "RESET"
+          ],
+          "description": "Commands used in upstream communication"
+        },
+        "payload": {
+          "type": "string",
+          "format": "byte",
+          "example": "0E599086-8301-48B0-8703-4D1B6F22F295",
+          "description": "The content of the payload"
+        }
+      }
+    },
+    "v1ConnectUpstreamResponse": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "example": "PING",
+          "enum": [
+            "INIT",
+            "PING",
+            "PONG",
+            "PUSH",
+            "FINISH",
+            "RESET"
+          ],
+          "description": "Commands used in upstream communication"
+        },
+        "payload": {
+          "type": "string",
+          "format": "byte",
+          "example": "0E599086-8301-48B0-8703-4D1B6F22F295",
+          "description": "The content of the payload"
         }
       }
     },
@@ -293,9 +382,9 @@
           "enum": [
             "PING",
             "PONG",
-            "DATA",
-            "CLOSE",
-            "EOF"
+            "PUSH",
+            "FINISH",
+            "RESET"
           ],
           "description": "Commands used in tunnel communication"
         },
@@ -329,6 +418,11 @@
           "type": "string",
           "example": "ADDED",
           "description": "Event type of upstream change"
+        },
+        "id": {
+          "type": "string",
+          "example": "481e3c97-638c-4b8f-b5f5-49baa23bd0c9",
+          "description": "The globally unique ID of upstream"
         },
         "protocol": {
           "type": "string",

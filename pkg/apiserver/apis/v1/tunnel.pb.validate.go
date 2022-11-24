@@ -676,7 +676,7 @@ func (m *TunnelMessage) validate(all bool) error {
 	if _, ok := _TunnelMessage_Command_InLookup[m.GetCommand()]; !ok {
 		err := TunnelMessageValidationError{
 			field:  "Command",
-			reason: "value must be in list [PING PONG DATA CLOSE EOF]",
+			reason: "value must be in list [PING PONG PUSH FINISH RESET]",
 		}
 		if !all {
 			return err
@@ -765,11 +765,11 @@ var _ interface {
 } = TunnelMessageValidationError{}
 
 var _TunnelMessage_Command_InLookup = map[string]struct{}{
-	"PING":  {},
-	"PONG":  {},
-	"DATA":  {},
-	"CLOSE": {},
-	"EOF":   {},
+	"PING":   {},
+	"PONG":   {},
+	"PUSH":   {},
+	"FINISH": {},
+	"RESET":  {},
 }
 
 // Validate checks the field values on WatchUpstreamsRequest with the rules
@@ -929,6 +929,18 @@ func (m *WatchUpstreamsResponse) validate(all bool) error {
 		err := WatchUpstreamsResponseValidationError{
 			field:  "EventType",
 			reason: "value must be in list [ADDED MODIFIED DELETED]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if err := m._validateUuid(m.GetId()); err != nil {
+		err = WatchUpstreamsResponseValidationError{
+			field:  "Id",
+			reason: "value must be a valid UUID",
+			cause:  err,
 		}
 		if !all {
 			return err
@@ -1105,6 +1117,14 @@ func (m *WatchUpstreamsResponse) _validateHostname(host string) error {
 	return nil
 }
 
+func (m *WatchUpstreamsResponse) _validateUuid(uuid string) error {
+	if matched := _tunnel_uuidPattern.MatchString(uuid); !matched {
+		return errors.New("invalid uuid format")
+	}
+
+	return nil
+}
+
 // WatchUpstreamsResponseMultiError is an error wrapping multiple validation
 // errors returned by WatchUpstreamsResponse.ValidateAll() if the designated
 // constraints aren't met.
@@ -1187,4 +1207,252 @@ var _WatchUpstreamsResponse_EventType_InLookup = map[string]struct{}{
 var _WatchUpstreamsResponse_Protocol_InLookup = map[string]struct{}{
 	"HTTP":  {},
 	"HTTPS": {},
+}
+
+// Validate checks the field values on ConnectUpstreamRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ConnectUpstreamRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ConnectUpstreamRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ConnectUpstreamRequestMultiError, or nil if none found.
+func (m *ConnectUpstreamRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ConnectUpstreamRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if _, ok := _ConnectUpstreamRequest_Command_InLookup[m.GetCommand()]; !ok {
+		err := ConnectUpstreamRequestValidationError{
+			field:  "Command",
+			reason: "value must be in list [INIT PING PONG PUSH FINISH RESET]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for Payload
+
+	if len(errors) > 0 {
+		return ConnectUpstreamRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// ConnectUpstreamRequestMultiError is an error wrapping multiple validation
+// errors returned by ConnectUpstreamRequest.ValidateAll() if the designated
+// constraints aren't met.
+type ConnectUpstreamRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ConnectUpstreamRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ConnectUpstreamRequestMultiError) AllErrors() []error { return m }
+
+// ConnectUpstreamRequestValidationError is the validation error returned by
+// ConnectUpstreamRequest.Validate if the designated constraints aren't met.
+type ConnectUpstreamRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConnectUpstreamRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConnectUpstreamRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConnectUpstreamRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConnectUpstreamRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConnectUpstreamRequestValidationError) ErrorName() string {
+	return "ConnectUpstreamRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ConnectUpstreamRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConnectUpstreamRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConnectUpstreamRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConnectUpstreamRequestValidationError{}
+
+var _ConnectUpstreamRequest_Command_InLookup = map[string]struct{}{
+	"INIT":   {},
+	"PING":   {},
+	"PONG":   {},
+	"PUSH":   {},
+	"FINISH": {},
+	"RESET":  {},
+}
+
+// Validate checks the field values on ConnectUpstreamResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *ConnectUpstreamResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ConnectUpstreamResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ConnectUpstreamResponseMultiError, or nil if none found.
+func (m *ConnectUpstreamResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ConnectUpstreamResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if _, ok := _ConnectUpstreamResponse_Command_InLookup[m.GetCommand()]; !ok {
+		err := ConnectUpstreamResponseValidationError{
+			field:  "Command",
+			reason: "value must be in list [INIT PING PONG PUSH FINISH RESET]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for Payload
+
+	if len(errors) > 0 {
+		return ConnectUpstreamResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// ConnectUpstreamResponseMultiError is an error wrapping multiple validation
+// errors returned by ConnectUpstreamResponse.ValidateAll() if the designated
+// constraints aren't met.
+type ConnectUpstreamResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ConnectUpstreamResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ConnectUpstreamResponseMultiError) AllErrors() []error { return m }
+
+// ConnectUpstreamResponseValidationError is the validation error returned by
+// ConnectUpstreamResponse.Validate if the designated constraints aren't met.
+type ConnectUpstreamResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ConnectUpstreamResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ConnectUpstreamResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ConnectUpstreamResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ConnectUpstreamResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ConnectUpstreamResponseValidationError) ErrorName() string {
+	return "ConnectUpstreamResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ConnectUpstreamResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sConnectUpstreamResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ConnectUpstreamResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ConnectUpstreamResponseValidationError{}
+
+var _ConnectUpstreamResponse_Command_InLookup = map[string]struct{}{
+	"INIT":   {},
+	"PING":   {},
+	"PONG":   {},
+	"PUSH":   {},
+	"FINISH": {},
+	"RESET":  {},
 }

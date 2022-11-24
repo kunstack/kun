@@ -15,7 +15,7 @@ syntax = "proto3";
 
 package apiserver.api.v1;
 
-option go_package = "github.com/aapelismith/kun/pkg/apiserver/api/v1";
+option go_package = "github.com/aapelismith/kun/pkg/apiserver/apis/v1";
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -27,7 +27,8 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
   info: {
     title: "Kun Tunnel Api Document";
     version: "v1.0";
-    description: "A fast reverse proxy to help you expose a local http server behind a NAT or firewall to the internet."
+    description: "A fast reverse proxy to help you expose a local"
+        " http server behind a NAT or firewall to the internet."
   };
 
   security:{
@@ -192,11 +193,11 @@ message WatchTunnelsResponse {
 message TunnelMessage {
   string command = 1 [
     (validate.rules).string = {
-      in: ["PING", "PONG", "DATA", "CLOSE", "EOF"];
+      in: ["PING", "PONG", "PUSH", "FINISH", "RESET"];
     },
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       example: '"PING"';
-      enum: ["PING", "PONG", "DATA", "CLOSE", "EOF"];
+      enum: ["PING", "PONG", "PUSH", "FINISH", "RESET"];
       description: "Commands used in tunnel communication";
     }
   ];
@@ -209,8 +210,8 @@ message TunnelMessage {
   ];
 }
 
-// BackendService is the upstream management service
-service BackendService {
+// BackendController is the upstream management service
+service BackendController {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
     description: "Upstream management service."
   };
@@ -251,6 +252,7 @@ service BackendService {
   }
 }
 
+
 message WatchUpstreamsRequest {
   google.protobuf.Timestamp startedAt = 1 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
@@ -271,7 +273,17 @@ message WatchUpstreamsResponse {
     }
   ];
 
-  string protocol = 2 [
+  string id = 2 [
+    (validate.rules).string = {
+      uuid: true;
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"481e3c97-638c-4b8f-b5f5-49baa23bd0c9"';
+      description: "The globally unique ID of upstream";
+    }
+  ];
+
+  string protocol = 3 [
     (validate.rules).string = {
       in: ["HTTP", "HTTPS"]
     },
@@ -283,7 +295,7 @@ message WatchUpstreamsResponse {
     }
   ];
 
-  string hostname = 3 [
+  string hostname = 4 [
     (validate.rules).string = {
       hostname: true;
       min_len: 1;
@@ -295,7 +307,7 @@ message WatchUpstreamsResponse {
     }
   ];
 
-  string accessKeyId = 4 [
+  string accessKeyId = 5 [
     (validate.rules).string.min_len = 1,
 
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
@@ -304,21 +316,21 @@ message WatchUpstreamsResponse {
     }
   ];
 
-  google.protobuf.Timestamp createdAt = 5 [
+  google.protobuf.Timestamp createdAt = 6 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       example: '"1970-01-01T00:00:00Z"';
       description: "The creation time of the current upstream";
     }
   ];
 
-  google.protobuf.Timestamp updatedAt = 6 [
+  google.protobuf.Timestamp updatedAt = 7 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       example: '"1970-01-01T00:00:00Z"';
       description: "Update time of current upstream";
     }
   ];
 
-  google.protobuf.Timestamp deletedAt = 7 [
+  google.protobuf.Timestamp deletedAt = 8 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       example: '"1970-01-01T00:00:00Z"';
       description: "The deletion time of the current upstream";
@@ -326,7 +338,49 @@ message WatchUpstreamsResponse {
   ];
 }
 
-service PeerService {
+message ConnectUpstreamRequest {
+  string command = 1 [
+    (validate.rules).string = {
+      in: ["INIT", "PING", "PONG", "PUSH", "FINISH", "RESET"];
+    },
+
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"INIT"';
+      enum: ["INIT", "PING", "PONG", "PUSH", "FINISH", "RESET"];
+      description: "Commands used in upstream communication";
+    }
+  ];
+
+  bytes payload = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"0E599086-8301-48B0-8703-4D1B6F22F295"';
+      description: "The content of the payload";
+    }
+  ];
+}
+
+message ConnectUpstreamResponse {
+  string command = 1 [
+    (validate.rules).string = {
+      in: ["INIT", "PING", "PONG", "PUSH", "FINISH", "RESET"];
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"PING"';
+      enum: ["INIT", "PING", "PONG", "PUSH", "FINISH", "RESET"];
+      description: "Commands used in upstream communication";
+    }
+  ];
+
+  bytes payload = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: '"0E599086-8301-48B0-8703-4D1B6F22F295"';
+      description: "The content of the payload";
+    }
+  ];
+}
+
+// PeerController peer management service.
+service PeerController {
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
     description: "Peer management service."
   };
@@ -339,6 +393,18 @@ service PeerService {
 
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Watch the changes of upstreams on the server side";
+    };
+  }
+
+  // ConnectUpstream attempt to connect tunnel using token
+  rpc ConnectUpstream (stream ConnectUpstreamRequest) returns (stream ConnectUpstreamResponse){
+    option (google.api.http) = {
+      post: "/v1/upstreams";
+      body: "*";
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Attempt to connect upstream using id.";
     };
   }
 }
